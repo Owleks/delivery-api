@@ -59,6 +59,34 @@ export const getOrders = async (req, res) => {
   }
 };
 
+export const getOrder = async (req, res) => {
+  const { userId } = extractAuth(req);
+  const { orderId } = req.params;
+  try {
+    const user = await UserModel.findById(userId);
+    if (!user) {
+      throw { status: 401, message: 'Not authorized' };
+    }
+    if (!orderId) {
+      throw { status: 400, message: '!orderId' };
+    }
+    const order = await OrderModel.findOne({ _id: orderId });
+    if (!order) {
+      throw { status: 404, message: 'Order not found' };
+    }
+    if (order.restaurant.toString() !== user.restaurant.toString()) {
+      throw { status: 403, message: 'Not an owner' };
+    }
+    res.status(200).json(order);
+  } catch (e) {
+    if (e.status) {
+      res.status(e.status).send(e.message);
+    } else {
+      throw e;
+    }
+  }
+};
+
 export const updateOrder = async (req, res) => {
   const { orderId } = req.params;
   const { userId } = extractAuth(req);
