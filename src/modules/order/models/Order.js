@@ -2,6 +2,8 @@ import mongoose from 'mongoose';
 
 const { Types } = mongoose;
 
+export const ORDER_STATUSES = ['open', 'confirmed', 'removed'];
+
 const OrderSchema = new mongoose.Schema({
   restaurant: Types.ObjectId,
   customerName: String,
@@ -14,8 +16,8 @@ const OrderSchema = new mongoose.Schema({
     count: Number,
   }],
   dateCreated: { type: Date, default: Date.now },
-  removed: { type: Boolean, default: false },
-  isConfirmed: { type: Boolean, default: false },
+  dateUpdated: { type: Date },
+  status: { type: String, default: ORDER_STATUSES[0] },
 });
 
 OrderSchema.index({ restaurant: 1, dateCreated: 1 });
