@@ -1,15 +1,16 @@
 import MenuModel from './models/Menu.js';
 import UserModel from '../user/models/User.js';
 
-import {extractAuth} from '../user/extractAuth.js';
-import {upload} from '../../sevices/S3Service.js';
+import { extractAuth } from '../user/extractAuth.js';
+import { upload } from '../../sevices/S3Service.js';
 
 
 export const createMenu = async (req, res) => {
   const { userId } = extractAuth(req);
   const { name } = req.body;
-  if (!name || !req.file)
+  if (!name || !req.file) {
     throw new Error('Name and image are required');
+  }
   try {
     const s3File = await upload(req.file);
     const user = await UserModel.findById(userId);
@@ -28,11 +29,12 @@ export const createMenu = async (req, res) => {
 
 export const deleteMenu = async (req, res) => {
   const { menuId } = req.params;
-  if (!menuId)
+  if (!menuId) {
     throw new Error('Id field is required');
+  }
   try {
     await MenuModel.deleteOne({
-      _id: menuId
+      _id: menuId,
     });
     res.status(204).send();
   } catch (e) {
@@ -42,12 +44,14 @@ export const deleteMenu = async (req, res) => {
 };
 
 export const getMenus = async (req, res) => {
-  const { restaurantId } = req.query;
-
+  const { restaurantId, menuId } = req.query;
   const filter = {};
-  if (restaurantId) {
-    filter.restaurant = restaurantId
+  if (menuId) {
+    filter._id = menuId;
+  } else if (restaurantId) {
+    filter.restaurant = restaurantId;
   }
+
   try {
     const menus = await MenuModel.find(filter);
     res.status(200).json(menus);
@@ -64,7 +68,7 @@ export const updateMenu = async (req, res) => {
   try {
     if (req.file) {
       const s3File = await upload(req.file);
-      updatedFields.image = s3File.key
+      updatedFields.image = s3File.key;
     }
     if (name) {
       updatedFields.name = name;
