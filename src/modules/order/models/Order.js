@@ -16,7 +16,7 @@ const OrderSchema = new mongoose.Schema({
     count: Number,
   }],
   dateCreated: { type: Date, default: Date.now },
-  dateUpdated: { type: Date },
+  dateUpdated: { type: Date, default: Date.now },
   status: { type: String, default: ORDER_STATUSES[0] },
 });
 
