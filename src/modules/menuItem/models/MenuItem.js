@@ -8,6 +8,7 @@ const MenuItemSchema = new mongoose.Schema({
   name: String,
   menuId: Types.ObjectId,
   restaurant: Types.ObjectId,
+  removed: {type: Boolean, default: false}
 });
 
 export default mongoose.model('MenuItem', MenuItemSchema);

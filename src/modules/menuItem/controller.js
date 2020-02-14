@@ -39,17 +39,14 @@ export const createMenuItem = async (req, res) => {
 };
 
 export const getMenuItem = async (req, res) => {
+  // TODO: add support to return all items, including removed
   const { menuId, restaurantId } = req.query;
   try {
     if (restaurantId) {
-      const menusInRestaurant = await MenuModel.find({ restaurant: restaurantId });
-      const menuIds = menusInRestaurant.map(item => item._id);
-      const items = await MenuItemModel.find({ menuId: { $in: menuIds } });
+      const items = await MenuItemModel.find({ restaurant: restaurantId, removed: {$ne: true} });
       res.status(200).send(items);
     } else {
-      const items = await MenuItemModel.find({
-        menuId,
-      });
+      const items = await MenuItemModel.find({ menuId, removed: {$ne: true} });
       res.status(200).json(items);
     }
   } catch (e) {
@@ -122,9 +119,9 @@ export const deleteMenuItem = async (req, res) => {
     throw new Error('Id param is required');
   }
   try {
-    await MenuItemModel.deleteOne({
+    await MenuItemModel.updateOne({
       _id: menuItemId,
-    });
+    }, {removed: true});
     res.status(204).send();
   } catch (e) {
     console.log(e);
