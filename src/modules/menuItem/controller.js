@@ -1,7 +1,7 @@
-import MenuItemModel from "./models/MenuItem.js";
-import MenuModel from "../menu/models/Menu.js";
-import {extractAuth} from "../user/extractAuth.js";
-import UserModel from "../user/models/User.js";
+import MenuItemModel from './models/MenuItem.js';
+import MenuModel from '../menu/models/Menu.js';
+import { extractAuth } from '../user/extractAuth.js';
+import UserModel from '../user/models/User.js';
 import {upload} from '../../sevices/S3Service.js';
 
 export const createMenuItem = async (req, res) => {
@@ -13,26 +13,27 @@ export const createMenuItem = async (req, res) => {
     UserModel.findOne({ _id: userId }),
   ]);
   if (!user || !menu) {
-    throw new Error('Щось не знайдено')
+    throw new Error('Щось не знайдено');
   }
 
   if (menu.restaurant.toString() !== user.restaurant.toString()) {
     throw new Error('Forbidden');
   }
-  if (!file) {
-    throw new Error('image is required');
-  }
-
-  if (!name || !price || !description || !menuId)
+    if (!file) {
+      throw new Error('image is required');
+    }
+  if (!name || !price || !description || !menuId) {
     throw new Error('name, price, description and menuId are required fields');
+  }
   try {
     const s3File = await upload(file);
     const menuItem = await MenuItemModel.create({
       name,
       price,
       description,
-      menuId: menuId,
-      image: s3File.key
+      menuId,
+      image: s3File.key,
+      restaurant: user.restaurant,
     });
     res.status(201).json(menuItem);
   } catch (e) {
@@ -51,9 +52,9 @@ export const getMenuItem = async (req, res) => {
       res.status(200).send(items);
     } else {
       const items = await MenuItemModel.find({
-        menuId
+        menuId,
       });
-      res.status(200).json(items)
+      res.status(200).json(items);
     }
   } catch (e) {
     console.log(e);
@@ -71,7 +72,7 @@ export const updateMenuItem = async (req, res) => {
   ]);
 
   if (!user || !menu) {
-    throw new Error('Щось не знайдено')
+    throw new Error('Щось не знайдено');
   }
 
 
@@ -81,12 +82,15 @@ export const updateMenuItem = async (req, res) => {
   const { name, price, description } = req.body;
   const updatedItem = {};
 
-  if (name)
+  if (name) {
     updatedItem.name = name;
-  if (price)
+  }
+  if (price) {
     updatedItem.price = price;
-  if (description)
+  }
+  if (description) {
     updatedItem.description = description;
+  }
   if (req.file) {
     const s3File = await upload(req.file);
     updatedItem.image = s3File.key;
@@ -94,8 +98,9 @@ export const updateMenuItem = async (req, res) => {
 
   try {
     const menuItem = await MenuItemModel.findOneAndUpdate({ _id: menuItemId }, updatedItem, { new: true });
-    if (!menuItem)
+    if (!menuItem) {
       return res.status(404).send(`menus with id ${menuItemId} not found`);
+    }
     res.status(200).json(menuItem);
   } catch (e) {
     console.log(e);
@@ -115,18 +120,19 @@ export const deleteMenuItem = async (req, res) => {
   ]);
 
   if (!user || !menu) {
-    throw new Error('Щось не знайдено')
+    throw new Error('Щось не знайдено');
   }
 
   if (menu.restaurant.toString() !== user.restaurant.toString()) {
     throw new Error('Forbidden');
   }
 
-  if (!menuItemId)
+  if (!menuItemId) {
     throw new Error('Id param is required');
+  }
   try {
     await MenuItemModel.deleteOne({
-      _id: menuItemId
+      _id: menuItemId,
     });
     res.status(204).send();
   } catch (e) {
