@@ -14,7 +14,6 @@ const app = express();
 // const userPass = 'nH1MzZgaSB5yrdN1';
 // const userLogin = 'deliverUser';
 
-app.use('/uploads', express.static('../uploads'));
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json({ type: 'application/*+json' }));
 app.use(bodyParser.json());
