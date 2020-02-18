@@ -2,16 +2,16 @@ import MenuItemModel from './models/MenuItem.js';
 import MenuModel from '../menu/models/Menu.js';
 import { extractAuth } from '../user/extractAuth.js';
 import UserModel from '../user/models/User.js';
+import {upload} from '../../sevices/S3Service.js';
 
 export const createMenuItem = async (req, res) => {
   const { name, price, description, menuId } = req.body;
-
+  const { file } = req;
   const { userId } = extractAuth(req);
   const [menu, user] = await Promise.all([
     MenuModel.findOne({ _id: menuId }),
     UserModel.findOne({ _id: userId }),
   ]);
-
   if (!user || !menu) {
     throw new Error('Щось не знайдено');
   }
@@ -19,16 +19,20 @@ export const createMenuItem = async (req, res) => {
   if (menu.restaurant.toString() !== user.restaurant.toString()) {
     throw new Error('Forbidden');
   }
-
+    if (!file) {
+      throw new Error('image is required');
+    }
   if (!name || !price || !description || !menuId) {
     throw new Error('name, price, description and menuId are required fields');
   }
   try {
+    const s3File = await upload(file);
     const menuItem = await MenuItemModel.create({
       name,
       price,
       description,
       menuId,
+      image: s3File.key,
       restaurant: user.restaurant,
     });
     res.status(201).json(menuItem);
@@ -68,6 +72,7 @@ export const updateMenuItem = async (req, res) => {
     throw new Error('Щось не знайдено');
   }
 
+
   if (menu.restaurant.toString() !== user.restaurant.toString()) {
     throw new Error('Forbidden');
   }
@@ -82,6 +87,10 @@ export const updateMenuItem = async (req, res) => {
   }
   if (description) {
     updatedItem.description = description;
+  }
+  if (req.file) {
+    const s3File = await upload(req.file);
+    updatedItem.image = s3File.key;
   }
 
   try {

@@ -7,6 +7,7 @@ const MenuItemSchema = new mongoose.Schema({
   description: String,
   name: String,
   menuId: Types.ObjectId,
+  image: String,
   restaurant: Types.ObjectId,
   removed: {type: Boolean, default: false}
 });
