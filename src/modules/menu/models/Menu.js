@@ -5,7 +5,8 @@ const { Types } = mongoose;
 const MenuSchema = new mongoose.Schema({
   name: String,
   restaurant: Types.ObjectId,
-  image: String
+  image: String,
+  removed: { type: Boolean, default: false },
 });
 
 export default mongoose.model('Menu', MenuSchema);

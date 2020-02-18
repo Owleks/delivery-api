@@ -1,5 +1,6 @@
 import MenuModel from './models/Menu.js';
 import UserModel from '../user/models/User.js';
+import MenuItemModel from '../menuItem/models/MenuItem.js';
 
 import { extractAuth } from '../user/extractAuth.js';
 import { upload } from '../../sevices/S3Service.js';
@@ -33,9 +34,8 @@ export const deleteMenu = async (req, res) => {
     throw new Error('Id field is required');
   }
   try {
-    await MenuModel.deleteOne({
-      _id: menuId,
-    });
+    await MenuModel.updateOne({ _id: menuId }, { removed: true });
+    await MenuItemModel.updateMany({ menuId }, { removed: true });
     res.status(204).send();
   } catch (e) {
     console.log(e);
@@ -51,6 +51,7 @@ export const getMenus = async (req, res) => {
   } else if (restaurantId) {
     filter.restaurant = restaurantId;
   }
+  filter.removed = { $ne: true };
 
   try {
     const menus = await MenuModel.find(filter);
