@@ -2,7 +2,7 @@ import mongoose from 'mongoose';
 
 const { Types } = mongoose;
 
-export const ORDER_STATUSES = ['open', 'confirmed', 'prepared', 'picked', 'delivered', 'archived'];
+export const ORDER_STATUSES = ['open', 'confirmed', 'preparing', 'picked', 'delivered'];
 
 const OrderSchema = new mongoose.Schema({
   restaurant: Types.ObjectId,
