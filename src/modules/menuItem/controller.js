@@ -43,16 +43,22 @@ export const createMenuItem = async (req, res) => {
 };
 
 export const getMenuItem = async (req, res) => {
-  // TODO: add support to return all items, including removed
-  const { menuId, restaurantId } = req.query;
+  const { restaurantId, menuId, all } = req.query;
+
+  if(!restaurantId && !menuId)
+    return res.status(400).send('!restaurantId || !menuId');
+
+  const filter = {};
+  if(restaurantId)
+    filter.restaurant = restaurantId;
+  else
+    filter.menuId = menuId;
+  if(!all)
+    filter.removed = {$ne: true};
+
   try {
-    if (restaurantId) {
-      const items = await MenuItemModel.find({ restaurant: restaurantId, removed: {$ne: true} });
-      res.status(200).send(items);
-    } else {
-      const items = await MenuItemModel.find({ menuId, removed: {$ne: true} });
-      res.status(200).json(items);
-    }
+    const items = await MenuItemModel.find(filter);
+    res.status(200).json(items);
   } catch (e) {
     console.log(e);
     res.status(500).send('Something went wrong');
