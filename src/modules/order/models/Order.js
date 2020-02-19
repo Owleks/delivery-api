@@ -9,7 +9,7 @@ const OrderSchema = new mongoose.Schema({
   customerName: String,
   phoneNumber: String,
   address: String,
-  deliveryTime: String, // TODO: make as date?
+  deliveryTime: Date,
   description: String,
   items: [{
     menuItemId: Types.ObjectId,
